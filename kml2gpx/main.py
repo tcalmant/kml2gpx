@@ -14,6 +14,7 @@ import gpxpy.gpx
 
 from .beans import AbstractInputHandler
 from .kml import KmlInputHandler
+from .private_radar import PrivateRadarHandler
 
 
 def main(args: Optional[List[str]] = None) -> int:
@@ -23,6 +24,7 @@ def main(args: Optional[List[str]] = None) -> int:
     # Known handlers
     input_handlers: List[AbstractInputHandler] = [
         KmlInputHandler(),
+        PrivateRadarHandler(),
     ]
 
     # Setup the arguments parser
