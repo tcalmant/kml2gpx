@@ -237,8 +237,8 @@ class PrivateRadar:
                 node["lon"],
                 node["lat"],
                 node["alt_m"],
-                # Private Radar timestamps are in nano seconds
-                datetime.fromtimestamp(node["time"] * 10 ** -9),
+                # Convert Private Radar timestamps
+                datetime.fromtimestamp(node["time"] * 10 ** -3),
             )
             for node in path
         ]
