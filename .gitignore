@@ -15,3 +15,6 @@ __pycache__/
 data/
 *.kml
 *.gpx
+
+# Temporary files
+*.json
