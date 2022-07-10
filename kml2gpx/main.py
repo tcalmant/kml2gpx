@@ -42,7 +42,9 @@ class KmlParser:
 
             self.kml = kml
 
-    def get_coordinates(self, layer_name: str = "Altitude",) -> List[TrackPoint]:
+    def get_coordinates(
+        self, layer_name: str = "Altitude",
+    ) -> List[TrackPoint]:
         if self.kml is None:
             raise IOError("KML data not loaded yet")
 
@@ -84,7 +86,9 @@ class KmlParser:
         return coords
 
 
-def set_times(coords: List[TrackPoint], start_time: datetime, end_time: datetime):
+def set_times(
+    coords: List[TrackPoint], start_time: datetime, end_time: datetime
+):
     time = start_time
     time_delta = (end_time - start_time) / len(coords)
     for coord in coords:
@@ -114,7 +118,9 @@ def main(args: Optional[List[str]] = None) -> int:
         "--end", action="extend", nargs="*", help="End time of the files"
     )
     parser.add_argument(
-        "--layer", default="Altitude", help="KML layer to extract (Altitude by default)"
+        "--layer",
+        default="Altitude",
+        help="KML layer to extract (Altitude by default)",
     )
     parser.add_argument(
         "-o",
@@ -143,7 +149,10 @@ def main(args: Optional[List[str]] = None) -> int:
             return 1
 
     if len(raw_start_times) != len(raw_end_times):
-        print("There must be the same number of start and end times", file=sys.stderr)
+        print(
+            "There must be the same number of start and end times",
+            file=sys.stderr,
+        )
         return 1
 
     if len(raw_start_times) != 0 and len(in_files) != len(raw_start_times):
