@@ -8,7 +8,7 @@ import pathlib
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Union, cast
 
 import gpxpy
 import gpxpy.gpx
@@ -96,6 +96,48 @@ def set_times(
         time += time_delta
 
 
+def load_from_files(
+    in_files: List[pathlib.Path],
+    start_times: Union[List[None], List[datetime]],
+    end_times: Union[List[None], List[datetime]],
+    layer: str = "Altitude",
+) -> gpxpy.gpx.GPXTrack:
+    """
+    Constructs a GPX track from the given files
+
+    :param in_files: List of input files
+    :param start_times: List of file start times (same size as `in_files`)
+    :param end_times: List of file end times (same size as `in_files`)
+    :param layer: Layer to use in the KML file
+    :return: A GPX track object
+    """
+    if len(start_times) != len(in_files) or len(end_times) != len(in_files):
+        raise ValueError("Invalid number of start/end times.")
+
+    if not layer:
+        raise ValueError("No KML layer given.")
+
+    gpx_track = gpxpy.gpx.GPXTrack()
+
+    # Parse files
+    for in_file, start_time, end_time in zip(in_files, start_times, end_times):
+        # Parse the KML file
+        kml = KmlParser()
+        kml.load(in_file)
+        file_coords = kml.get_coordinates(layer)
+
+        # Update times
+        if start_time is not None and end_time is not None:
+            set_times(file_coords, start_time, end_time)
+
+        # Create the GPX segment
+        gpx_segment = gpxpy.gpx.GPXTrackSegment()
+        gpx_segment.points = [trk.to_gpx() for trk in file_coords]
+        gpx_track.segments.append(gpx_segment)
+
+    return gpx_track
+
+
 def main(args: Optional[List[str]] = None) -> int:
     """
     Script entry point
@@ -171,26 +213,12 @@ def main(args: Optional[List[str]] = None) -> int:
     if output is None:
         output = in_files[0].with_suffix(".gpx")
 
+    # Parse the files
+    gpx_track = load_from_files(in_files, start_times, end_times, layer)
+
     # Prepare the root GPX structure
     gpx = gpxpy.gpx.GPX()
-    gpx_track = gpxpy.gpx.GPXTrack()
     gpx.tracks.append(gpx_track)
-
-    # Parse files
-    for in_file, start_time, end_time in zip(in_files, start_times, end_times):
-        # Parse the KML file
-        kml = KmlParser()
-        kml.load(in_file)
-        file_coords = kml.get_coordinates(layer)
-
-        # Update times
-        if start_time is not None and end_time is not None:
-            set_times(file_coords, start_time, end_time)
-
-        # Create the GPX segment
-        gpx_segment = gpxpy.gpx.GPXTrackSegment()
-        gpx_segment.points = [trk.to_gpx() for trk in file_coords]
-        gpx_track.segments.append(gpx_segment)
 
     # Write the GPX file
     with open(output, "w", encoding="utf-8") as gpx_fd:
