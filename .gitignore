@@ -1,0 +1,17 @@
+# IDE
+.vscode
+.project
+.classpath
+.settings
+.idea
+*.iml
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Input/output files
+data/
+*.kml
+*.gpx
