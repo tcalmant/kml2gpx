@@ -11,6 +11,12 @@
 *.pyo
 __pycache__/
 
+# Distribution
+dist/
+*.tar.gz
+*.whl
+*.egg-info/
+
 # Input/output files
 data/
 *.kml
