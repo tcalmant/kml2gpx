@@ -1,6 +1,7 @@
 # KML 2 GPX for Private Radar extractions
 
-Converts KML files from Private Radar flights list to a GPX file usable with
+Converts KML files from [Private Radar](https://www.private-radar.com/)
+flights list to a GPX file usable with, for example,
 [ayvri](https://ayvri.com/).
 
 ## KML input
