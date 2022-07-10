@@ -172,7 +172,11 @@ class PrivateRadar:
         :param flight_id: Private Radar flight ID
         :return: The description of the flight
         """
-        return self.list_flights(100, flight_id=flight_id)[0]
+        if flight_id >= 0:
+            return self.list_flights(100, flight_id=flight_id)[0]
+        else:
+            nb_flights = abs(flight_id)
+            return self.list_flights(nb_flights)[abs(flight_id) - 1]
 
     def flight_path(self, flight: Union[int, PRFlight]) -> List[TrackPoint]:
         """
@@ -275,7 +279,10 @@ class PrivateRadarHandler(AbstractInputHandler):
         )
 
         parser.add_argument(
-            "-f", "--flight", type=int, help="ID of the flight to extract",
+            "-f",
+            "--flight",
+            type=int,
+            help="ID of the flight to extract (or -1 for last flight, ...)",
         )
 
     def _find_conf(self) -> Optional[pathlib.Path]:
@@ -354,6 +361,8 @@ class PrivateRadarHandler(AbstractInputHandler):
 
             # Load the flight
             self.flight = self.api.get_flight(flight_id)
+            print("Loaded flight:")
+            self.print_flight(self.flight)
 
     def get_default_output_path(self) -> Optional[pathlib.Path]:
         """
@@ -399,19 +408,23 @@ class PrivateRadarHandler(AbstractInputHandler):
             return 1
 
         for flight in self.api.list_flights(nb_flights):
-            start = flight.start.isoformat(" ") if flight.start else "n/a"
-            end = flight.end.isoformat(" ") if flight.end else "n/a"
-
-            sep = "---" if not flight.starred else "==="
-            star = " (*)" if flight.starred else ""
-
-            print(f"{sep} Flight #{flight.id}{star} {sep}")
-            print("* From.:", flight.from_icao)
-            print("* To...:", flight.to_icao)
-            print("* Crew.:", ", ".join(flight.crew))
-            print("* Type.:", flight.flight_type)
-            print("* Start:", start)
-            print("* End..:", end)
-            print()
+            self.print_flight(flight)
 
         return 0
+
+    @staticmethod
+    def print_flight(flight):
+        start = flight.start.isoformat(" ") if flight.start else "n/a"
+        end = flight.end.isoformat(" ") if flight.end else "n/a"
+
+        sep = "---" if not flight.starred else "==="
+        star = " (*)" if flight.starred else ""
+
+        print(f"{sep} Flight #{flight.id}{star} {sep}")
+        print("* From.:", flight.from_icao)
+        print("* To...:", flight.to_icao)
+        print("* Crew.:", ", ".join(flight.crew))
+        print("* Type.:", flight.flight_type)
+        print("* Start:", start)
+        print("* End..:", end)
+        print()
